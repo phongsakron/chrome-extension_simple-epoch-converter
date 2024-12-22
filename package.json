@@ -1,7 +1,7 @@
 {
-  "name": "my-timestamp-converter",
-  "version": "0.1.0",
-  "description": "My Chrome Extension",
+  "name": "Simple Epoch Converter",
+  "version": "1.0.0",
+  "description": "Simple Chrome Extension to convert timestamps to human readable format",
   "private": true,
   "scripts": {
     "watch": "webpack --mode=development --watch --config config/webpack.config.js",
@@ -19,9 +19,12 @@
     "mini-css-extract-plugin": "^2.9.2",
     "prettier": "^2.8.8",
     "ts-loader": "^9.2.8",
-    "typescript": "^4.6.3",
+    "typescript": "^4.9.5",
     "webpack": "^5.97.1",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.10.0"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8"
   }
 }

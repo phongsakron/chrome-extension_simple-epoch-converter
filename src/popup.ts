@@ -2,111 +2,40 @@
 
 import './popup.css';
 
-(function () {
-  // We will make use of Storage API to get and store `count` value
-  // More information on Storage API can we found at
-  // https://developer.chrome.com/extensions/storage
+document.getElementById('timestampInput')?.addEventListener('input', () => {
+  const input = (document.getElementById('timestampInput') as HTMLInputElement)
+    .value;
+  const timestamp = parseInt(input, 10);
 
-  // To get storage access, we have to mention it in `permissions` property of manifest.json file
-  // More information on Permissions can we found at
-  // https://developer.chrome.com/extensions/declare_permissions
-  const counterStorage = {
-    get: (cb: (count: number) => void) => {
-      chrome.storage.sync.get(['count'], (result) => {
-        cb(result.count);
-      });
-    },
-    set: (value: number, cb: () => void) => {
-      chrome.storage.sync.set(
-        {
-          count: value,
-        },
-        () => {
-          cb();
-        }
-      );
-    },
-  };
-
-  function setupCounter(initialValue = 0) {
-    document.getElementById('counter')!.innerHTML = initialValue.toString();
-
-    document.getElementById('incrementBtn')!.addEventListener('click', () => {
-      updateCounter({
-        type: 'INCREMENT',
-      });
-    });
-
-    document.getElementById('decrementBtn')!.addEventListener('click', () => {
-      updateCounter({
-        type: 'DECREMENT',
-      });
-    });
-  }
-
-  function updateCounter({ type }: { type: string }) {
-    counterStorage.get((count: number) => {
-      let newCount: number;
-
-      if (type === 'INCREMENT') {
-        newCount = count + 1;
-      } else if (type === 'DECREMENT') {
-        newCount = count - 1;
-      } else {
-        newCount = count;
-      }
-
-      counterStorage.set(newCount, () => {
-        document.getElementById('counter')!.innerHTML = newCount.toString();
-
-        // Communicate with content script of
-        // active tab by sending a message
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-          const tab = tabs[0];
-
-          chrome.tabs.sendMessage(
-            tab.id!,
-            {
-              type: 'COUNT',
-              payload: {
-                count: newCount,
-              },
-            },
-            (response) => {
-              console.log('Current count value passed to contentScript file');
-            }
-          );
-        });
-      });
-    });
-  }
-
-  function restoreCounter() {
-    // Restore count value
-    counterStorage.get((count: number) => {
-      if (typeof count === 'undefined') {
-        // Set counter value as 0
-        counterStorage.set(0, () => {
-          setupCounter(0);
-        });
-      } else {
-        setupCounter(count);
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', restoreCounter);
-
-  // Communicate with background file by sending a message
-  chrome.runtime.sendMessage(
-    {
-      type: 'GREETINGS',
-      payload: {
-        message: 'Hello, my name is Pop. I am from Popup.',
-      },
-    },
-    (response) => {
-      console.log(response.message);
+  if (!isNaN(timestamp)) {
+    // Detect seconds or milliseconds
+    let adjustedTimestamp: number;
+    let epochTimestamp: number;
+    if (input.length === 10) {
+      adjustedTimestamp = timestamp * 1000; // Convert seconds to milliseconds
+      epochTimestamp = timestamp;
+    } else if (input.length === 13) {
+      adjustedTimestamp = timestamp; // Already in milliseconds
+      epochTimestamp = Math.floor(timestamp / 1000); // Convert to seconds
+    } else {
+      document.getElementById('result')!.innerText =
+        'Invalid timestamp format. Please enter a valid epoch timestamp.';
+      return;
     }
-  );
-})();
+
+    const date = new Date(adjustedTimestamp);
+    const utcString = date.toUTCString();
+    const localString = date.toString();
+
+    const resultElement = document.getElementById('result');
+    resultElement!.innerHTML = `
+      <strong>Epoch timestamp:</strong> ${epochTimestamp}<br>
+      <strong>Timestamp in milliseconds:</strong> ${adjustedTimestamp}<br>
+      <strong>Date and time (GMT):</strong> ${utcString}<br>
+      <strong>Date and time (your time zone):</strong> ${localString}
+    `;
+  } else {
+    document.getElementById('result')!.innerText =
+      'Invalid UNIX/Epoch timestamp.';
+  }
+});

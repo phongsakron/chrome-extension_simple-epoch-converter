@@ -10,35 +10,79 @@
 
 // For more information on Content Scripts,
 // See https://developer.chrome.com/extensions/content_scripts
+import { createPopper } from '@popperjs/core';
+let _popupElement: HTMLElement | null = null; // Track the current popup
+let _mousePositionElement: HTMLElement | null = null; // Track the current popup
+let _setTimeoutRef: NodeJS.Timeout | null = null; // Track the timeout event
+document.addEventListener('mouseup', (event) => {
+  const selection = window.getSelection()?.toString().trim();
+  if (selection && !isNaN(parseInt(selection, 10))) {
+    // Remove any existing popup if a new selection is made
+    if (_popupElement) {
+      removePopup();
+    }
 
-// Log `title` of current active web page
-const pageTitle: string =
-  document.head.getElementsByTagName('title')[0].innerHTML;
-console.log(
-  `Page title is: '${pageTitle}' - evaluated by Chrome extension's 'contentScript.js' file`
-);
+    const timestamp = parseInt(selection, 10);
 
-// Communicate with background file by sending a message
-chrome.runtime.sendMessage(
-  {
-    type: 'GREETINGS',
-    payload: {
-      message: 'Hello, my name is Con. I am from ContentScript.',
-    },
-  },
-  (response) => {
-    console.log(response.message);
+    // Detect seconds or milliseconds
+    let adjustedTimestamp: number;
+    let epochTimestamp: number;
+    if (selection.length === 10) {
+      adjustedTimestamp = timestamp * 1000; // Convert seconds to milliseconds
+      epochTimestamp = timestamp;
+    } else if (selection.length === 13) {
+      adjustedTimestamp = timestamp; // Already in milliseconds
+      epochTimestamp = Math.floor(timestamp / 1000); // Convert to seconds
+    } else {
+      alert('Invalid timestamp format. Please select a valid epoch timestamp.');
+      return;
+    }
+
+    const date = new Date(adjustedTimestamp);
+    const utcString = date.toUTCString();
+    const localString = date.toString();
+
+    _popupElement = document.createElement('div');
+    _popupElement.id = 'timestamp-popup';
+    _popupElement.style.background = '#fff';
+    _popupElement.style.padding = '0.25rem';
+    _popupElement.style.border = '1px solid #ccc';
+    _popupElement.style.borderRadius = '4px';
+    _popupElement.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    _popupElement.innerHTML = `
+      <strong>Epoch timestamp:</strong> ${epochTimestamp}<br>
+      <strong>Timestamp in milliseconds:</strong> ${adjustedTimestamp}<br>
+      <strong>Date and time (GMT):</strong> ${utcString}<br>
+      <strong>Date and time (your time zone):</strong> ${localString}
+    `;
+    document.body.appendChild(_popupElement);
+
+    _mousePositionElement = document.createElement('span');
+    _mousePositionElement.style.position = 'absolute';
+    _mousePositionElement.style.left = `${event.pageX}px`;
+    _mousePositionElement.style.top = `${event.pageY}px`;
+    document.body.appendChild(_mousePositionElement);
+
+    createPopper(_mousePositionElement, _popupElement, {
+      placement: 'top',
+    });
   }
-);
-
-// Listen for message
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'COUNT') {
-    console.log(`Current count is ${request.payload.count}`);
-  }
-
-  // Send an empty response
-  // See https://github.com/mozilla/webextension-polyfill/issues/130#issuecomment-531531890
-  sendResponse({});
-  return true;
 });
+// Remove popup if user clicks outside
+document.addEventListener('mousedown', (e) => {
+  if (_popupElement && !_popupElement.contains(e.target as Node)) {
+    removePopup();
+  }
+});
+
+function removePopup() {
+  if (_popupElement) {
+    _mousePositionElement?.remove();
+    _mousePositionElement = null;
+    _popupElement.remove();
+    _popupElement = null;
+  }
+  if (_setTimeoutRef) {
+    clearTimeout(_setTimeoutRef);
+  }
+}
