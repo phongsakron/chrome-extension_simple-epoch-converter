@@ -19,6 +19,7 @@ jobs:
 
       - name: Package for release
         run: |
+          npm ci
           npm run repack
 
       - name: Create the release
