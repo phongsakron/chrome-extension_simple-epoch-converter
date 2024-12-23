@@ -2,7 +2,23 @@
 
 import './popup.css';
 
+document.addEventListener('DOMContentLoaded', () => {
+  chrome.storage.local.get('selectedTimestamp', (data) => {
+    if (data.selectedTimestamp) {
+      const input = document.getElementById(
+        'timestampInput'
+      ) as HTMLInputElement;
+      input.value = data.selectedTimestamp;
+      showResult();
+    }
+  });
+});
+
 document.getElementById('timestampInput')?.addEventListener('input', () => {
+  showResult();
+});
+
+function showResult() {
   const input = (document.getElementById('timestampInput') as HTMLInputElement)
     .value;
   const timestamp = parseInt(input, 10);
@@ -38,4 +54,4 @@ document.getElementById('timestampInput')?.addEventListener('input', () => {
     document.getElementById('result')!.innerText =
       'Invalid UNIX/Epoch timestamp.';
   }
-});
+}

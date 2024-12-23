@@ -73,8 +73,15 @@ document.addEventListener('mousedown', (e) => {
   if (_popupElement && !_popupElement.contains(e.target as Node)) {
     removePopup();
   }
+  if (_bottomLeftModal && !_bottomLeftModal.contains(e.target as Node)) {
+    removeModal();
+  }
 });
 
+function removeModal() {
+  _bottomLeftModal?.remove();
+  _bottomLeftModal = null;
+}
 function removePopup() {
   if (_popupElement) {
     _mousePositionElement?.remove();
@@ -86,3 +93,68 @@ function removePopup() {
     clearTimeout(_setTimeoutRef);
   }
 }
+
+// A variable to store or reference our bottom-left modal
+let _bottomLeftModal: HTMLDivElement | null = null;
+
+// Listen to the "copy" event
+document.addEventListener('copy', () => {
+  let copiedText = '';
+  try {
+    copiedText = window.getSelection()?.toString() || '';
+  } catch (e) {
+    console.error('Error reading clipboard text:', e);
+  }
+  if (!copiedText) return;
+
+  // Check if it might be a timestamp (seconds or milliseconds)
+  const numericValue = parseInt(copiedText, 10);
+  if (isNaN(numericValue)) return; // Not a number at all
+
+  // Now determine if it's 10-digit (seconds) or 13-digit (milliseconds)
+  let epochSeconds: number;
+  if (copiedText.length === 10) {
+    epochSeconds = numericValue;
+  } else if (copiedText.length === 13) {
+    epochSeconds = Math.floor(numericValue / 1000);
+  } else {
+    return; // Not recognized as a standard epoch
+  }
+
+  // Create or update our bottom-left modal
+  if (!_bottomLeftModal) {
+    _bottomLeftModal = document.createElement('div');
+    _bottomLeftModal.id = 'simple-epoch-modal';
+    _bottomLeftModal.style.position = 'fixed';
+    _bottomLeftModal.style.left = '20px';
+    _bottomLeftModal.style.bottom = '20px';
+    _bottomLeftModal.style.padding = '10px';
+    _bottomLeftModal.style.border = '1px solid #ccc';
+    _bottomLeftModal.style.borderRadius = '4px';
+    _bottomLeftModal.style.backgroundColor = '#fff';
+    _bottomLeftModal.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    _bottomLeftModal.style.zIndex = '999999'; // Ensure it's on top
+
+    document.body.appendChild(_bottomLeftModal);
+  }
+
+  // Convert the epochSeconds to local date
+  const date = new Date(epochSeconds * 1000);
+  const utcString = date.toUTCString();
+  const localString = date.toString();
+
+  // Fill the modal content
+  _bottomLeftModal.innerHTML = `
+    <b>Timestamp:</b> ${copiedText}<br/>
+    <b>Epoch (seconds):</b> ${epochSeconds}<br/>
+    <b>UTC:</b> ${utcString}<br/>
+    <b>Local:</b> ${localString}
+  `;
+});
+// Remove popup if user clicks outside
+document.addEventListener('mousedown', (e) => {
+  if (_bottomLeftModal && !_bottomLeftModal.contains(e.target as Node)) {
+    _bottomLeftModal.remove();
+    _bottomLeftModal = null;
+  }
+});
