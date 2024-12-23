@@ -10,31 +10,33 @@ A lightweight Chrome extension that converts UNIX/Epoch timestamps to readable U
 ## Features
 
 - Auto-Detection of seconds or milliseconds
-- Select text on any webpage to automatically display a date/time popup
+- Select text or Copy text on any webpage to automatically display a date/time popup/modal
 - Manual Input via extension popup
 
 ## Getting Started
 
 
   1. Clone or Download
-      ```bash
-      git clone https://github.com/phongsakron/simple-epoch-converter.git
-      cd simple-epoch-converter
-      ```
-  2. Install Dependencies
-      ```bash
-      npm install
-      ```
-  3. Build the Project
-      ```bash
-      npm run build
-      ```
-      This will compile your TypeScript files into the build/ folder.
-  4. Load the Extension in Chrome
+     - Clone and build the project
+        ```bash
+        git clone https://github.com/phongsakron/simple-epoch-converter.git
+        cd simple-epoch-converter
+        ```
+        1. Install Dependencies
+            ```bash
+            npm install
+            ```
+        2. Build the Project
+            ```bash
+            npm run build
+            ```
+            This will compile your TypeScript files into the build/ folder.
+      - [Download the latest release](https://github.com/phongsakron/chrome-extension_simple-epoch-converter/releases)
+  2. Load the Extension in Chrome
       - Go to chrome://extensions.
       - Enable Developer Mode (top-right toggle).
       - Click Load unpacked.
-      - Select the build folder of this project.
+      - Select the build folder or unzipped folder.
       - The Simple Epoch Converter icon should appear in your toolbar.
 
 ## Icon Credit
