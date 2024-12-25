@@ -26,4 +26,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./release/my-timestamp-converter-${{ github.ref_name }}.zip
+          files: ./release/chrome-extension_simple-epoch-converter-${{ github.ref_name }}.zip
