@@ -34,7 +34,7 @@ document.addEventListener('mouseup', (event) => {
       adjustedTimestamp = timestamp; // Already in milliseconds
       epochTimestamp = Math.floor(timestamp / 1000); // Convert to seconds
     } else {
-      alert('Invalid timestamp format. Please select a valid epoch timestamp.');
+      console.error('Invalid timestamp format. Please select a valid epoch timestamp.');
       return;
     }
 
