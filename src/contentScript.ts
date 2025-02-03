@@ -49,6 +49,7 @@ document.addEventListener('mouseup', (event) => {
     _popupElement.style.border = '1px solid #ccc';
     _popupElement.style.borderRadius = '4px';
     _popupElement.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+    _popupElement.style.zIndex = '999999';
     _popupElement.innerHTML = `
       <strong>Epoch timestamp:</strong> ${epochTimestamp}<br>
       <strong>Timestamp in milliseconds:</strong> ${adjustedTimestamp}<br>
